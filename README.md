@@ -2,18 +2,20 @@
 
 Proyecto final de la asignatura **Análisis Inteligente de la Información**
 — Máster en Ingeniería Informática, UC3M.
+Alumno: Gabriel Gómez García (GGG).
 
 ## Descripción del problema
 
-Madrid cuenta con más de 4.000 puntos de medida de tráfico distribuidos por la ciudad.
+Madrid tiene más de 4.000 puntos de medida de tráfico repartidos por toda la ciudad.
 Cada sensor registra cada 15 minutos la intensidad de vehículos, la ocupación de la
 calzada y la **carga** (0–100%), que mide el nivel de saturación de la vía.
 
-El objetivo de este proyecto es predecir si una vía va a estar congestionada en función
-de la hora, el día de la semana y la ubicación del sensor. Un modelo de este tipo puede
-servir para anticipar atascos, optimizar rutas o predecir picos de contaminación.
+El objetivo del proyecto es predecir si una vía va a estar congestionada en función
+de la hora, el día de la semana y la ubicación del sensor. Es un problema de
+clasificación binaria. Un sistema así puede servir para anticipar atascos, optimizar
+rutas o predecir picos de contaminación.
 
-## Datos
+## Fuente de datos
 
 Los datasets provienen del [portal de datos abiertos del Ayuntamiento de Madrid][mad].
 
@@ -26,58 +28,72 @@ Los datasets provienen del [portal de datos abiertos del Ayuntamiento de Madrid]
 [hist]: https://datos.madrid.es/dataset/208627-0-transporte-ptomedida-historico
 [sens]: https://datos.madrid.es/dataset/202468-0-intensidad-trafico
 
-> Los ficheros CSV no están incluidos en el repositorio por su tamaño.
-> Consulta `data/README.md` para las instrucciones de descarga.
+> Los ficheros CSV no están incluidos en el repositorio por su tamaño. El notebook 01
+> los descarga automáticamente al ejecutarse. Consulta `data/README.md` si prefieres
+> descargarlos a mano.
 
-## Requisitos
+## Requisitos e instalación
 
 - Python 3.12
-- Las dependencias están en `requirements.txt`
-
-## Instalación
+- Dependencias en `requirements.txt` (pandas, numpy, matplotlib, seaborn, scikit-learn, requests, jupyter)
 
 ```bash
-# Crear entorno virtual
+# Crear entorno virtual e instalar dependencias
 python -m venv .venv
 source .venv/Scripts/activate   # Windows
 # source .venv/bin/activate     # Linux / macOS
 
-# Instalar dependencias
 pip install -r requirements.txt
-
-# Descargar los datos (ver data/README.md)
 
 # Lanzar Jupyter
 jupyter notebook
 ```
+
+Los notebooks descargan los datos solos al ejecutarse. No hace falta nada más.
 
 ## Estructura del proyecto
 
 ```text
 analisis-datos-proyecto-final/
 ├── data/
-│   └── README.md                      # Instrucciones de descarga
+│   ├── raw/                           # Datos descargados (no se suben al repo)
+│   ├── processed/                     # Dataset preparado por el notebook 02 (no se sube)
+│   └── README.md                      # Instrucciones de descarga manual
 ├── notebooks/
 │   ├── 01_EDA_GGG.ipynb               # Análisis exploratorio de datos
 │   ├── 02_Preparacion_GGG.ipynb       # Limpieza y preparación del dataset
 │   ├── 03_Modelos_GGG.ipynb           # Comparativa de modelos de ML
 │   └── 04_Evaluacion_GGG.ipynb        # Evaluación final y demo de predicción
+├── README.md
+├── README.txt
 └── requirements.txt
 ```
 
 ## Ejecución de los notebooks
 
-Los notebooks deben ejecutarse en orden:
+Los notebooks deben ejecutarse en orden. Cada uno parte del trabajo del anterior.
 
-1. **`01_EDA_GGG.ipynb`** — Exploración de los datos. Patrones temporales y espaciales,
-   análisis de errores de sensor y justificación del umbral de congestión.
+1. **`01_EDA_GGG.ipynb` — Análisis exploratorio de datos**
+   Descarga los datos del portal del Ayuntamiento y los explora a fondo. Se analiza
+   cómo se distribuye la variable `carga`, se justifica el umbral del 70% para definir
+   cuándo hay congestión, se estudian los errores de sensor y los patrones de tráfico
+   por hora, día de la semana y distrito. Termina con los insights que guían el resto
+   del proyecto.
 
-2. **`02_Preparacion_GGG.ipynb`** — Limpieza de errores, merge de los dos datasets,
-   ingeniería de características y definición de la variable objetivo. Genera el dataset
-   procesado que usan los notebooks siguientes.
+2. **`02_Preparacion_GGG.ipynb` — Limpieza y construcción del dataset**
+   Aplica lo aprendido en el EDA: quita las lecturas erróneas, une las mediciones con
+   la ubicación de cada sensor y construye las variables que usará el modelo (hora,
+   día, si es hora punta, distrito...). Define la etiqueta binaria "congestionado" y
+   divide los datos en entrenamiento y test. Guarda el resultado en `data/processed/`.
 
-3. **`03_Modelos_GGG.ipynb`** — Comparativa de Regresión Logística, Random Forest y
-   Gradient Boosting con justificación de métricas.
+3. **`03_Modelos_GGG.ipynb` — Comparativa de modelos**
+   Explica por qué la accuracy no es una buena métrica aquí y elige F1 y AUC. Entrena
+   tres modelos de complejidad creciente (regresión logística, Random Forest y Gradient
+   Boosting) con validación cruzada, los compara en una tabla y elige el mejor
+   justificando la decisión.
 
-4. **`04_Evaluacion_GGG.ipynb`** — Evaluación del modelo seleccionado: matriz de confusión,
-   curva ROC, feature importance y demo de predicción práctica por sensor y hora del día.
+4. **`04_Evaluacion_GGG.ipynb` — Evaluación final y demo**
+   Abre el test por primera vez y evalúa el modelo con datos que no ha visto nunca.
+   Incluye matriz de confusión, curva ROC, qué variables pesan más y en qué horas y
+   zonas falla el modelo. Termina con una función que, dado un sensor y una hora,
+   devuelve si habrá congestión y con qué probabilidad.
