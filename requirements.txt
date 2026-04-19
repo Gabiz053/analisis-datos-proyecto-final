@@ -6,3 +6,4 @@ scikit-learn
 jupyter
 requests
 contextily
+pyarrow
